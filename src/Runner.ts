@@ -71,10 +71,22 @@ export class Runner {
      * Returns a callback which can be passed on to other functions
      * to call. For instance from stdout callbacks of child processes.
      *
+     * @param eol line ending pattern, if undefined takes every input as a line.
      */
-    public callback(): (line: string) => void {
-        return (line: string) => {
-            this.parse(line);
+    public callback(eol?: string): (input: string) => void {
+        let last = ""
+        return (input: string) => {
+            last += input;
+            let lines = [last];
+            if (eol != null) {
+                lines = last.split(eol);
+                last = lines.pop()!;
+            } else {
+                last = "";
+            }
+            for (const line of lines) {
+                this.parse(line);
+            }
         };
     }
 }

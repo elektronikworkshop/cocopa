@@ -62,7 +62,7 @@ test(`CCppProperties write`, () => {
     let fileData = "";
 
     const fsExistsSyncSpy = jest.spyOn(fs, "existsSync").mockReturnValue(false);
-    const fsMkdirSyncSpy = jest.spyOn(fs, "mkdirSync").mockReturnValue();
+    const fsMkdirSyncSpy = jest.spyOn(fs, "mkdirSync").mockReturnValue(undefined);
     const fsWriteFileSyncSpy = jest
         .spyOn(fs, "writeFileSync")
         .mockImplementation(

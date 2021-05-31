@@ -41,7 +41,7 @@ for (const file of fs.readdirSync(path.join(stimuliDir, fieldDir))) {
         }
 
         const stimulus = stimulusRawFor(path.join(fieldDir, file));
-        const lines = stimulus.split(lineSplitRegEx());
+        const lines = stimulus.match(/[^]{1,256}/g) ?? [];
 
         const trigger = getTriggerFor(TriggerTarget.ArduinoGpp, platform);
         const gpp = new ParserGcc(trigger);
@@ -51,7 +51,7 @@ for (const file of fs.readdirSync(path.join(stimuliDir, fieldDir))) {
         gpp.infoParser ? (gpp.infoParser.enabled = false) : null;
 
         const runner = new Runner([gpp]);
-        const cb = runner.callback();
+        const cb = runner.callback('\n');
 
         lines.forEach(line => {
             cb(line);
