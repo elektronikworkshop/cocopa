@@ -18,11 +18,25 @@ export enum GccGetBuiltIn {
     Defines = "-dM",
 }
 
-export function gccGetBuiltInCmd(exe: string, what: GccGetBuiltIn) {
+function escapeCmd(option: string, quoted: boolean): string {
+    option = option.replace("\\", "\\\\").replace("\"", "\\\"")
+    if (quoted) {
+        return "\"" + option + "\""
+    } else {
+        return option
+    }
+}
+
+export function gccGetBuiltInCmd(exe: string, what: GccGetBuiltIn, options?: string[]) {
+    let optionsString = ""
+    if (options != null && options.length != 0) {
+        optionsString = options.map(option => escapeCmd(option, true)).join(" ")
+    }
+    exe = escapeCmd(exe, true);
     return os.platform() === "win32"
         ? // changing to codepage 65001 (utf8 on Windoze)
-          `chcp 65001>nul && "${exe}" -xc++ ${what} -E -v - < nul 2>&1`
-        : `bash -c "\\"${exe}\\" -xc++ ${what} -E -v - < /dev/null 2>&1"`;
+          `chcp 65001>nul && "${exe}" -xc++ ${optionsString} ${what} -E -v - < nul 2>&1`
+        : `bash -c "${escapeCmd(exe, false)} -xc++ ${escapeCmd(optionsString, false)} ${what} -E -v - < /dev/null 2>&1"`;
 }
 
 /**
@@ -47,9 +61,9 @@ export function gccGetBuiltInCmd(exe: string, what: GccGetBuiltIn) {
  * @see https://stackoverflow.com/a/6666338
  * @see https://support.microsoft.com/en-us/help/110930/redirecting-error-messages-from-command-prompt-stderr-stdout
  */
-export function gccGetBuiltIn(exe: string, what: GccGetBuiltIn) {
+export function gccGetBuiltIn(exe: string, what: GccGetBuiltIn, options?: string[]) {
     try {
-        return cp.execSync(gccGetBuiltInCmd(exe, what), {encoding: "utf8"});
+        return cp.execSync(gccGetBuiltInCmd(exe, what, options), {encoding: "utf8"});
     } catch (e) {
         return undefined;
     }
@@ -59,18 +73,18 @@ export function gccGetBuiltIn(exe: string, what: GccGetBuiltIn) {
  * Implementation of BuiltInInfoParser for gcc-like compilers.
  */
 export class BuiltInInfoParserGcc extends BuiltInInfoParser {
-    public info(exe: string): IBuiltInInfo | undefined {
+    public info(exe: string, options?: string[]): IBuiltInInfo | undefined {
         return {
-            includes: this._includes(exe),
-            defines: this._defines(exe),
+            includes: this._includes(exe, options),
+            defines: this._defines(exe, options),
         };
     }
     /**
      * Tries to retrieve the compiler's built in include paths.
      * @param exe Path to compiler executable.
      */
-    private _includes(exe: string): string[] {
-        const stdout = gccGetBuiltIn(exe, GccGetBuiltIn.Includes);
+    private _includes(exe: string, options?: string[]): string[] {
+        const stdout = gccGetBuiltIn(exe, GccGetBuiltIn.Includes, options);
         if (!stdout) {
             return [];
         }
@@ -109,8 +123,8 @@ export class BuiltInInfoParserGcc extends BuiltInInfoParser {
      * Tries to retrieve the compiler's built in defines.
      * @param exe Path to compiler executable.
      */
-    private _defines(exe: string): string[] {
-        const stdout = gccGetBuiltIn(exe, GccGetBuiltIn.Defines);
+    private _defines(exe: string, options?: string[]): string[] {
+        const stdout = gccGetBuiltIn(exe, GccGetBuiltIn.Defines, options);
         if (!stdout) {
             return [];
         }
