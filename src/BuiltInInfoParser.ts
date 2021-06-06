@@ -32,5 +32,5 @@ export abstract class BuiltInInfoParser {
         return this._enabled;
     }
 
-    public abstract info(executable: string): IBuiltInInfo | undefined;
+    public abstract info(executable: string, options?: string[]): IBuiltInInfo | undefined;
 }
