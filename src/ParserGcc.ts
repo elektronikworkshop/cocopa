@@ -119,7 +119,6 @@ export class ParserGcc extends Parser {
             const std = lut.get(m[1]);
             if (std) {
                 result.cppStandard = std;
-                return;
             }
         }
     }
