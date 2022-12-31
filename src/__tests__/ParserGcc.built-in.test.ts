@@ -9,6 +9,7 @@
  */
 import * as os from "os";
 import {ParserGcc} from "../ParserGcc";
+import {ResultCppStandard} from "../Result";
 import {makeExecSyncSpy} from "./mocks";
 import {gccGetBuiltInCmd, GccGetBuiltIn} from "../BuiltInInfoParserGcc";
 
@@ -26,11 +27,13 @@ for (const platform of ["win32", "darwin", "linux"]) {
         const execSyncSpy = makeExecSyncSpy([
             {
                 file: "gpp.amd64.builtin.includes.stimulus.txt",
-                pattern: gccGetBuiltInCmd(exe, GccGetBuiltIn.Includes),
+                pattern: gccGetBuiltInCmd(exe, ResultCppStandard.None,
+                                          GccGetBuiltIn.Includes),
             },
             {
                 file: "gpp.amd64.builtin.defines.stimulus.txt",
-                pattern: gccGetBuiltInCmd(exe, GccGetBuiltIn.Defines),
+                pattern: gccGetBuiltInCmd(exe, ResultCppStandard.None,
+                                          GccGetBuiltIn.Defines),
             },
         ]);
 
