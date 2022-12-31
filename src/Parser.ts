@@ -124,7 +124,7 @@ export abstract class Parser {
                 this._infoParser.enabled &&
                 res.compiler.length
             ) {
-                const nfo = this._infoParser.info(res.compiler);
+                const nfo = this._infoParser.info(res.compiler, res.cppStandard);
                 if (nfo) {
                     res.includes = [...res.includes, ...nfo.includes];
                     res.defines = [...res.defines, ...nfo.defines];

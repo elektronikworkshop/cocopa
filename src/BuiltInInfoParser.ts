@@ -7,6 +7,8 @@
  *
  * All rights reserved.
  */
+import {ResultCppStandard} from "./Result";
+
 /**
  * Return value of any BuiltInInfoParser.
  * Contains the includes and other data which are intrinsically
@@ -32,5 +34,5 @@ export abstract class BuiltInInfoParser {
         return this._enabled;
     }
 
-    public abstract info(executable: string): IBuiltInInfo | undefined;
+    public abstract info(executable: string, cppStandard: ResultCppStandard): IBuiltInInfo | undefined;
 }
