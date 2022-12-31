@@ -63,6 +63,10 @@ const tests: {options: string[]; std: ResultCppStandard}[] = [
         options: [],
         std: ResultCppStandard.None,
     },
+    {
+        options: ["std=gnu++11", "-std=gnu++20"],
+        std: ResultCppStandard.Cpp20,
+    },
 ];
 
 for (const t of tests) {
