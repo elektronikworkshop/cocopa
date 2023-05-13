@@ -11,6 +11,8 @@ import * as fs from "fs";
 import * as os from "os";
 import * as path from "path";
 
+import Readline from "readline";
+
 /**
  * Escape a string such that it can be used within regular expressions.
  *
@@ -139,6 +141,11 @@ export async function fsstat(entry: string) {
             }
         });
     });
+}
+
+export function readAtFile(path: string): string {
+    const file = fs.readFileSync(path, "utf8");
+    return file;
 }
 
 /**

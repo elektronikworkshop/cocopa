@@ -2,6 +2,7 @@
  * defines, arguments and more from compiler command line invocations.
  *
  * Copyright (C) 2020 Uli Franke - Elektronik Workshop
+ * Copyright (C) 2023 Tyler Watson
  *
  * Distributed under the MIT license. See LICENSE file for details.
  *
@@ -12,14 +13,36 @@ import * as shlex from "shlex";
 import {Result, ResultCppStandard} from "./Result";
 import {Parser} from "./Parser";
 import {BuiltInInfoParserGcc} from "./BuiltInInfoParserGcc";
-import {IParserTrigger} from "./helpers";
+import {IParserTrigger, readAtFile} from "./helpers";
+
+type DirectoryOptionType =
+    | "prefix"
+    | "withprefix"
+    | "withprefixbefore"
+    | "sysroot"
+    | "multilib"
+    | "plugindir"
+    | "quote"
+    | "system"
+    | "dirafter";
 
 /**
  *  Compiler command parsing engine for gcc compilers.
  */
 export class ParserGcc extends Parser {
-    constructor(trigger: IParserTrigger) {
+    // support GCC Directory Options (arduino-pico)
+    // https://gcc.gnu.org/onlinedocs/gcc/Directory-Options.html
+    directoryOptions: Partial<Record<DirectoryOptionType, string[]>> = {};
+
+    constructor(
+        trigger: IParserTrigger,
+        directoryOptions?: Partial<Record<DirectoryOptionType, string[]>>,
+    ) {
         super(trigger, new BuiltInInfoParserGcc());
+        this._trigger = trigger;
+        if (directoryOptions) {
+            Object.assign(this.directoryOptions, directoryOptions);
+        }
     }
     protected parse(line: string): Result {
         const result = new Result();
@@ -65,6 +88,54 @@ export class ParserGcc extends Parser {
             if (c) {
                 result.compiler = arg;
                 continue;
+            }
+
+            // support GCC directory options
+            const dOptions = arg.match(
+                /^-i(\w+)\s?(.+)$/,
+            );
+            if (dOptions) {
+                const option: DirectoryOptionType = dOptions[1] as DirectoryOptionType;
+                const path = dOptions[2];
+
+                switch (option) {
+                    case "withprefix":
+                    case "withprefixbefore":
+                        if (
+                            !Array.isArray(this.directoryOptions.prefix) ||
+                            !this.directoryOptions.prefix.length
+                        ) {
+                            break;
+                        }
+
+                        const [prefix] = this.directoryOptions.prefix;
+                        if (!prefix) {
+                            break;
+                        }
+
+                        result.includes.push(`${prefix}${path}`);
+                        break;
+                    default:
+                        this.directoryOptions[option] =
+                            this.directoryOptions[option] ??
+                            (this.directoryOptions[option] = []);
+                        this.directoryOptions[option]?.push(path);
+                }
+
+                continue;
+            }
+
+            // support @file paths
+            const atPath = arg.match(/^@\s?(.+)$/);
+            if (atPath) {
+                const file = readAtFile(atPath[1]);
+                const subParser = new ParserGcc(this._trigger, this.directoryOptions);
+                const subResult = subParser.parse(file);
+
+                result.defines.push(...subResult.defines);
+                result.includes.push(...subResult.includes);
+                result.options.push(...subResult.options);
+                result.trash.push(...subResult.options);
             }
 
             // filter out option trash

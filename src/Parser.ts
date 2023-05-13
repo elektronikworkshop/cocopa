@@ -18,7 +18,7 @@ import {IParserTrigger} from "./helpers";
  * CompilerCmdParserEngineGcc.
  */
 export abstract class Parser {
-    private _trigger: IParserTrigger;
+    protected _trigger: IParserTrigger;
     private _result: Result | undefined;
     /**
      * This array should contain the patterns which should match on
