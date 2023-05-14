@@ -91,9 +91,7 @@ export class ParserGcc extends Parser {
             }
 
             // support GCC directory options
-            const dOptions = arg.match(
-                /^-i(\w+)\s?(.+)$/,
-            );
+            const dOptions = arg.match(/^-i(\w+)\s?(.+)$/);
             if (dOptions) {
                 const option: DirectoryOptionType = dOptions[1] as DirectoryOptionType;
                 const path = dOptions[2];
@@ -129,7 +127,10 @@ export class ParserGcc extends Parser {
             const atPath = arg.match(/^@\s?(.+)$/);
             if (atPath) {
                 const file = readAtFile(atPath[1]);
-                const subParser = new ParserGcc(this._trigger, this.directoryOptions);
+                const subParser = new ParserGcc(
+                    this._trigger,
+                    this.directoryOptions,
+                );
                 const subResult = subParser.parse(file);
 
                 result.defines.push(...subResult.defines);
