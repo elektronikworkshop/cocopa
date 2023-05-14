@@ -1,6 +1,6 @@
 {
   "name": "cocopa",
-  "version": "0.0.14",
+  "version": "0.0.15",
   "description": "Compiler Command Parser - Parser to extract include directories, defines, arguments and more from compiler command line invocations.",
   "main": "lib/index.js",
   "types": "lib/index.d.ts",
