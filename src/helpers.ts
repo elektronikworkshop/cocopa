@@ -143,8 +143,8 @@ export async function fsstat(entry: string) {
     });
 }
 
-export function readAtFile(path: string): string {
-    const file = fs.readFileSync(path, "utf8");
+export function readAtFile(filePath: string): string {
+    const file = fs.readFileSync(filePath, "utf8");
     return file;
 }
 
